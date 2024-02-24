@@ -7,15 +7,16 @@ export DOCKER_DEFAULT_PLATFORM=linux/amd64
 
 
 VERSION=${VERSION:-latest}
-OPERATOR_IMAGE= quay.io/openshift/lightspeed-service-api@sha256:8c941b183853e57d0ca00fe5201b724794c284790d83b1f39a688e4f1e7b2671
+OPERATOR_IMAGE=lightspeed-operator@sha256:c27acc1d6db151d9f463c8e0936356724f3e57cee4f358b82478b056b6b61377
+REPLACE_IMAGE=lightspeed-operator:latest
 
-
-rm -rf ./bundle
-
-
-make bundle VERSION=$VERSION
-
-#make bundle-build bundle-push VERSION=$VERSION
+#rm -rf ./bundle
+#make bundle VERSION=$VERSION
+#"s/name: analytics-operator.v0.1.0/name: analytics-operator.v$VERSION/"
+sed -i.bak "s/name: lightspeed-operator.v0.0.0/name: lightspeed-operator.v$VERSION/" bundle/manifests/lightspeed-operator.clusterserviceversion.yaml
+sed -i.bak "s/version: 0.0.0/version: $VERSION/" bundle/manifests/lightspeed-operator.clusterserviceversion.yaml
+sed -i.bak "s/$REPLACE_IMAGE/$OPERATOR_IMAGE/" bundle/manifests/lightspeed-operator.clusterserviceversion.yaml
+make bundle-build bundle-push VERSION=$VERSION
 
 #make catalog-build catalog-push VERSION=$VERSION
 

@@ -4,8 +4,10 @@ metadata:
   annotations:
     alm-examples: '[]'
     capabilities: Basic Install
+    operatorframework.io/cluster-monitoring: "true"
+    operatorframework.io/suggested-namespace: openshift-lightspeed
   name: lightspeed-operator.v0.0.0
-  namespace: placeholder
+  namespace: openshift-lightspeed
 spec:
   apiservicedefinitions: {}
   customresourcedefinitions:
