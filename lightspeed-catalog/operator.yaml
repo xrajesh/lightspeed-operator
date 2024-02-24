@@ -187,7 +187,7 @@ properties:
 - type: olm.package
   value:
     packageName: lightspeed-operator
-    version: 0.0.0
+    version: 0.0.32
 - type: olm.bundle.object
   value:
     data: eyJhcGlWZXJzaW9uIjoidjEiLCJraW5kIjoiU2VydmljZSIsIm1ldGFkYXRhIjp7ImNyZWF0aW9uVGltZXN0YW1wIjpudWxsLCJsYWJlbHMiOnsiYXBwLmt1YmVybmV0ZXMuaW8vY29tcG9uZW50Ijoia3ViZS1yYmFjLXByb3h5IiwiYXBwLmt1YmVybmV0ZXMuaW8vY3JlYXRlZC1ieSI6ImxpZ2h0c3BlZWQtb3BlcmF0b3IiLCJhcHAua3ViZXJuZXRlcy5pby9pbnN0YW5jZSI6ImNvbnRyb2xsZXItbWFuYWdlci1tZXRyaWNzLXNlcnZpY2UiLCJhcHAua3ViZXJuZXRlcy5pby9tYW5hZ2VkLWJ5Ijoia3VzdG9taXplIiwiYXBwLmt1YmVybmV0ZXMuaW8vbmFtZSI6InNlcnZpY2UiLCJhcHAua3ViZXJuZXRlcy5pby9wYXJ0LW9mIjoibGlnaHRzcGVlZC1vcGVyYXRvciIsImNvbnRyb2wtcGxhbmUiOiJjb250cm9sbGVyLW1hbmFnZXIifSwibmFtZSI6ImxpZ2h0c3BlZWQtb3BlcmF0b3ItY29udHJvbGxlci1tYW5hZ2VyLW1ldHJpY3Mtc2VydmljZSJ9LCJzcGVjIjp7InBvcnRzIjpbeyJuYW1lIjoiaHR0cHMiLCJwb3J0Ijo4NDQzLCJwcm90b2NvbCI6IlRDUCIsInRhcmdldFBvcnQiOiJodHRwcyJ9XSwic2VsZWN0b3IiOnsiY29udHJvbC1wbGFuZSI6ImNvbnRyb2xsZXItbWFuYWdlciJ9fSwic3RhdHVzIjp7ImxvYWRCYWxhbmNlciI6e319fQ==
@@ -208,3 +208,9 @@ relatedImages:
 - image: quay.io/xrajesh/lightspeed-operator-bundle@sha256:dfa1d7fd22ac7b7bdfd26bbb2e3c9f93b25454450b6bc92da670043efa4d8037
   name: ""
 schema: olm.bundle
+---
+schema: olm.channel
+package: lightspeed-operator
+name: alpha
+entries:
+  - name: lightspeed-operator.v0.0.32
