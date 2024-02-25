@@ -23,7 +23,7 @@ sed -i.bak "s/$REPLACE_API_IMAGE/$API_IMAGE/" bundle/manifests/lightspeed-operat
 rm -rf bundle/manifests/lightspeed-operator.clusterserviceversion.yaml.bak
 make bundle-build bundle-push VERSION=$VERSION
 
-#make catalog-build catalog-push VERSION=$VERSION
+#opm render quay.io/example-inc/example-operator-bundle:v0.1.0 --output=yaml >> lightspeed-catalog/operator.yaml
 
 
 
