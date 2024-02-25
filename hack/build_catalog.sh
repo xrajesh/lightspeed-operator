@@ -15,7 +15,7 @@ REPLACE_API_IMAGE=lightspeed-service-api:latest
 
 rm -rf ./bundle
 make bundle VERSION=$VERSION
-#"s/name: analytics-operator.v0.1.0/name: analytics-operator.v$VERSION/"
+
 sed -i.bak "s/name: lightspeed-operator.v0.0.0/name: lightspeed-operator.v$VERSION/" bundle/manifests/lightspeed-operator.clusterserviceversion.yaml
 sed -i.bak "s/version: 0.0.0/version: $VERSION/" bundle/manifests/lightspeed-operator.clusterserviceversion.yaml
 sed -i.bak "s/$REPLACE_OPERATOR_IMAGE/$OPERATOR_IMAGE/" bundle/manifests/lightspeed-operator.clusterserviceversion.yaml
