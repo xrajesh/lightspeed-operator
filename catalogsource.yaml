@@ -8,7 +8,7 @@ spec:
   sourceType: grpc
   secrets:
     - xrajesh-pull-secret
-  image: quay.io/xrajesh/lightspeed-operator-catalog@sha256:0b48ce94c63e23f12b3f9ec288160799dcf0255f40de02855ddd66ed18867172 
+  image: quay.io/xrajesh/lightspeed-operator-catalog@sha256:705de93a17a95bf881a9fd065fb3826686910f46dc78d2edc8eba94a7d762134 
   updateStrategy:
     registryPoll:
       interval: 10m

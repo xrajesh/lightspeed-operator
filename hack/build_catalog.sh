@@ -6,16 +6,21 @@ set -e
 export DOCKER_DEFAULT_PLATFORM=linux/amd64
 
 
-VERSION=${VERSION:-latest}
-OPERATOR_IMAGE=lightspeed-operator@sha256:c27acc1d6db151d9f463c8e0936356724f3e57cee4f358b82478b056b6b61377
-REPLACE_IMAGE=lightspeed-operator:latest
+VERSION=0.0.43
+OPERATOR_IMAGE=lightspeed-operator@sha256:2f18050dc1a81d6be1afba8e200a52d9dbd7e23346d089075ce8a64bdb619951
+API_IMAGE=lightspeed-service-api@sha256:8c941b183853e57d0ca00fe5201b724794c284790d83b1f39a688e4f1e7b2671
 
-#rm -rf ./bundle
-#make bundle VERSION=$VERSION
+REPLACE_OPERATOR_IMAGE=lightspeed-operator:$VERSION
+REPLACE_API_IMAGE=lightspeed-service-api:latest
+
+rm -rf ./bundle
+make bundle VERSION=$VERSION
 #"s/name: analytics-operator.v0.1.0/name: analytics-operator.v$VERSION/"
 sed -i.bak "s/name: lightspeed-operator.v0.0.0/name: lightspeed-operator.v$VERSION/" bundle/manifests/lightspeed-operator.clusterserviceversion.yaml
 sed -i.bak "s/version: 0.0.0/version: $VERSION/" bundle/manifests/lightspeed-operator.clusterserviceversion.yaml
-sed -i.bak "s/$REPLACE_IMAGE/$OPERATOR_IMAGE/" bundle/manifests/lightspeed-operator.clusterserviceversion.yaml
+sed -i.bak "s/$REPLACE_OPERATOR_IMAGE/$OPERATOR_IMAGE/" bundle/manifests/lightspeed-operator.clusterserviceversion.yaml
+sed -i.bak "s/$REPLACE_API_IMAGE/$API_IMAGE/" bundle/manifests/lightspeed-operator.clusterserviceversion.yaml
+rm -rf bundle/manifests/lightspeed-operator.clusterserviceversion.yaml.bak
 make bundle-build bundle-push VERSION=$VERSION
 
 #make catalog-build catalog-push VERSION=$VERSION

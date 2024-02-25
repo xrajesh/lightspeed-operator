@@ -37,12 +37,12 @@ metadata:
         }
       ]
     capabilities: Basic Install
-    createdAt: "2024-02-24T13:31:26Z"
-    operators.operatorframework.io/builder: operator-sdk-v1.33.0
-    operators.operatorframework.io/project_layout: go.kubebuilder.io/v4
+    createdAt: "2024-02-25T02:08:51Z"
     operatorframework.io/cluster-monitoring: "true"
     operatorframework.io/suggested-namespace: openshift-lightspeed
-  name: lightspeed-operator.v0.0.32
+    operators.operatorframework.io/builder: operator-sdk-v1.33.0
+    operators.operatorframework.io/project_layout: go.kubebuilder.io/v4
+  name: lightspeed-operator.v0.0.43
   namespace: openshift-lightspeed
 spec:
   apiservicedefinitions: {}
@@ -178,7 +178,7 @@ spec:
                 - --health-probe-bind-address=:8081
                 - --metrics-bind-address=127.0.0.1:8080
                 - --leader-elect
-                - --images=lightspeed-service=quay.io/openshift/lightspeed-service-api:latest
+                - --images=lightspeed-service=quay.io/openshift/lightspeed-service-api@sha256:8c941b183853e57d0ca00fe5201b724794c284790d83b1f39a688e4f1e7b2671
                 command:
                 - /manager
                 env:
@@ -186,7 +186,7 @@ spec:
                   valueFrom:
                     fieldRef:
                       fieldPath: metadata.annotations['olm.targetNamespaces']
-                image: quay.io/openshift/lightspeed-operator@sha256:c27acc1d6db151d9f463c8e0936356724f3e57cee4f358b82478b056b6b61377
+                image: quay.io/xrajesh/lightspeed-operator@sha256:2f18050dc1a81d6be1afba8e200a52d9dbd7e23346d089075ce8a64bdb619951
                 livenessProbe:
                   httpGet:
                     path: /healthz
@@ -295,4 +295,4 @@ spec:
   provider:
     name: Red Hat, Inc
     url: https://github.com/openshift/lightspeed-service
-  version: 0.0.32
+  version: 0.0.43
