@@ -28,6 +28,14 @@ const (
 	OLSAppCertsMountRoot = "/etc/certs"
 	// LLMApiTokenFileName is the name of the file containing the API token to access LLM in the secret referenced by the OLSConfig
 	LLMApiTokenFileName = "apitoken"
+	// AzureClientSecretFileName is the name of the file containing the client secret to access Azure in the secret referenced by the OLSConfig
+	AzureClientSecretFileName = "client_secret"
+	// AzureClientId is the Client ID to access Azure in the secret referenced by the OLSConfig
+	AzureClientId = "client_id"
+	// AzureTenantId is the Tenant ID to access Azure in the secret referenced by the OLSConfig
+	AzureTenantId = "tenant_id"
+	//AzureOpenAIProviderType is the name of the Azure OpenAI provider
+	AzureOpenAIProviderType = "azure_openai"
 	// OLSComponentPasswordFileName is the generic name of the password file for each of its components
 	OLSComponentPasswordFileName = "password"
 	// OLSConfigFilename is the name of the application server configuration file

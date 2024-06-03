@@ -106,7 +106,6 @@ func (r *OLSConfigReconciler) generateSARClusterRoleBinding(cr *olsv1alpha1.OLSC
 func (r *OLSConfigReconciler) generateOLSConfigMap(cr *olsv1alpha1.OLSConfig) (*corev1.ConfigMap, error) {
 	providerConfigs := []ProviderConfig{}
 	for _, provider := range cr.Spec.LLMConfig.Providers {
-		credentialPath := path.Join(APIKeyMountRoot, provider.CredentialsSecretRef.Name, LLMApiTokenFileName)
 		modelConfigs := []ModelConfig{}
 		for _, model := range provider.Models {
 			modelConfig := ModelConfig{
@@ -120,10 +119,19 @@ func (r *OLSConfigReconciler) generateOLSConfigMap(cr *olsv1alpha1.OLSConfig) (*
 			Name:                provider.Name,
 			Type:                provider.Type,
 			URL:                 provider.URL,
-			CredentialsPath:     credentialPath,
 			Models:              modelConfigs,
 			AzureDeploymentName: provider.AzureDeploymentName,
 			WatsonProjectID:     provider.WatsonProjectID,
+		}
+		if provider.Type != AzureOpenAIProviderType {
+			credentialPath := path.Join(APIKeyMountRoot, provider.CredentialsSecretRef.Name, LLMApiTokenFileName)
+			providerConfig.CredentialsPath = credentialPath
+		} else {
+			azureOpenAIConfig, err := getAzureOpenAIConfig(r.Client, provider.CredentialsSecretRef.Name, r.Options.Namespace, provider.URL, provider.AzureDeploymentName)
+			if err != nil {
+				return nil, fmt.Errorf("failed to generate OLS config file with AzureOpenAIConfig %w", err)
+			}
+			providerConfig.AzureOpenAIConfig = azureOpenAIConfig
 		}
 		providerConfigs = append(providerConfigs, providerConfig)
 	}

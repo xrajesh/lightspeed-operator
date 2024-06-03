@@ -35,23 +35,37 @@ type ProviderConfig struct {
 	URL string `json:"url,omitempty"`
 	// Path to the file containing API provider credentials in the app server container.
 	// default to "bam_api_key.txt"
-	CredentialsPath string `json:"credentials_path" default:"bam_api_key.txt"`
+	CredentialsPath string `json:"credentials_path,omitempty" default:"bam_api_key.txt"`
 	// List of models from the provider
 	Models []ModelConfig `json:"models,omitempty"`
 	// Provider type
 	Type string `json:"type,omitempty"`
 	// Azure deployment name
 	AzureDeploymentName string `json:"deployment_name,omitempty"`
+	//Azure OpenAI configuration
+	AzureOpenAIConfig *AzureOpenAIConfig `json:"azure_openai_config,omitempty"`
 	// Watsonx Project ID
 	WatsonProjectID string `json:"project_id,omitempty"`
 }
 
-// ModelSpec defines the desired state of in-memory cache.
 type ModelConfig struct {
 	// Model name
 	Name string `json:"name"`
 	// Model API URL
 	URL string `json:"url,omitempty"`
+}
+
+// A
+type AzureOpenAIConfig struct {
+	// URL of the Azure OpenAI service
+	URL string `json:"url,omitempty"`
+	// Azure deployment name
+	AzureDeploymentName string `json:"deployment_name,omitempty"`
+	// Path to the file containing Azure OpenAI credentials in the app server container.
+	CredentialsPath  string `json:"credentials_path,omitempty"`
+	TenantID         string `json:"tenant_id,omitempty"`
+	ClientID         string `json:"client_id,omitempty"`
+	ClientSecretPath string `json:"client_secret_path,omitempty"`
 }
 
 type OLSConfig struct {

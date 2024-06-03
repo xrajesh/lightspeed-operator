@@ -5,6 +5,7 @@ import (
 	"crypto/sha256"
 	"fmt"
 	"os"
+	"path"
 	"sort"
 	"strings"
 
@@ -335,4 +336,47 @@ func getProxyEnvVars() []corev1.EnvVar {
 		}
 	}
 	return envVars
+}
+
+func getCredentinalOptions(providerType string) [][]string {
+	if providerType == AzureOpenAIProviderType {
+		return [][]string{{AzureClientSecretFileName, AzureClientId, AzureTenantId}, {LLMApiTokenFileName}}
+	}
+	// return LLMApiTokenFileName as default
+	return [][]string{{LLMApiTokenFileName}}
+}
+
+func getCredentialsConfig(rclient client.Client, secretName string, namespace string, providerType string, foundSecret *corev1.Secret) (map[string]string, error) {
+	credentialConfig := getCredentinalOptions(providerType)
+	for _, fields := range credentialConfig {
+		secretValues, err := getSecretContent(rclient, secretName, namespace, fields, foundSecret)
+		if err == nil {
+			return secretValues, nil
+		}
+	}
+	return nil, fmt.Errorf("failed to get valid credential options from secret %s", secretName)
+}
+
+func getAzureOpenAIConfig(rclient client.Client, secretName string, namespace string, url string, azureDeploymentName string) (*AzureOpenAIConfig, error) {
+	azureProviderConfig := AzureOpenAIConfig{}
+	secretValues, err := getCredentialsConfig(rclient, secretName, namespace, AzureOpenAIProviderType, &corev1.Secret{})
+	if err != nil {
+		return nil, err
+	}
+	azureProviderConfig.URL = url
+	azureProviderConfig.AzureDeploymentName = azureDeploymentName
+	for key, value := range secretValues {
+		switch key {
+		case AzureClientId:
+			azureProviderConfig.ClientID = value
+		case AzureTenantId:
+			azureProviderConfig.TenantID = value
+		case AzureClientSecretFileName:
+			azureProviderConfig.ClientSecretPath = path.Join(APIKeyMountRoot, secretName, AzureClientSecretFileName)
+		case LLMApiTokenFileName:
+			azureProviderConfig.CredentialsPath = path.Join(APIKeyMountRoot, secretName, LLMApiTokenFileName)
+
+		}
+	}
+	return &azureProviderConfig, nil
 }

@@ -273,11 +273,13 @@ func (r *OLSConfigReconciler) reconcileLLMSecrets(ctx context.Context, cr *olsv1
 	providerCredentials := ""
 	for _, provider := range cr.Spec.LLMConfig.Providers {
 		foundSecret := &corev1.Secret{}
-		secretValues, err := getSecretContent(r.Client, provider.CredentialsSecretRef.Name, r.Options.Namespace, []string{LLMApiTokenFileName}, foundSecret)
+		secretValues, err := getCredentialsConfig(r.Client, provider.CredentialsSecretRef.Name, r.Options.Namespace, provider.Type, foundSecret)
 		if err != nil {
 			return fmt.Errorf("Secret token not found for provider: %s. error: %w", provider.Name, err)
 		}
-		providerCredentials += secretValues[LLMApiTokenFileName]
+		for _, value := range secretValues {
+			providerCredentials += value
+		}
 		annotateSecretWatcher(foundSecret)
 		err = r.Update(ctx, foundSecret)
 		if err != nil {
