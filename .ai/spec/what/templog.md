@@ -6,50 +6,52 @@ Implementation details for the lightspeed-operator's role in the templog feature
 
 ### CRD
 
-1. `AgenticOLSConfig.spec.templog` is a boolean field. Default: `true`.
-2. The operator reads `spec.templog` during reconciliation to decide whether to deploy the Collector.
+1. `OLSConfig.spec.templog` is a boolean field. Default: `true`. Controls whether the Collector's postgres exporter is active.
+2. `OLSConfig.spec.audit.otel.endpoint` is an optional string field. When set, the Collector forwards traces to this endpoint.
+3. All audit, tracing, and templog configuration lives on `OLSConfig`. `AgenticOLSConfig` has no telemetry fields.
 
 ### PostgreSQL Bootstrap
 
-3. When `spec.templog` is `true` (or absent), the Postgres bootstrap script creates the `templogs` schema alongside the existing `quota` and `conversation_cache` schemas.
-4. The bootstrap script creates the `templogs.logs` table and `idx_logs_trace_id` index (see parent spec for DDL).
-5. When `spec.templog` is `false`, the bootstrap script does not create the `templogs` schema. If it already exists, it is left in place — no destructive cleanup.
+4. The Postgres bootstrap script always creates the `templogs` schema alongside the existing `quota` and `conversation_cache` schemas (regardless of `spec.templog` value).
+5. The bootstrap script creates the `templogs.logs` table and `idx_logs_trace_id` index (see parent spec for DDL).
 
-### Collector Deployment
+### Collector Deployment (Always On)
 
-6. When `spec.templog` is `true` (or absent), the operator deploys a single-replica Deployment for the custom OTel Collector using the `lightspeed-otel-postgres-collector` container image.
+6. The operator always deploys a single-replica Deployment for the custom OTel Collector using the `lightspeed-otel-collector` container image.
 7. The Collector Deployment follows the same management patterns as PostgreSQL: operator-managed image reference, resource requirements, tolerations, node selectors.
 8. The operator creates a Service exposing port 4317 (OTLP gRPC) for the Collector.
-9. The operator creates a ConfigMap containing the Collector configuration (YAML). The configuration specifies the OTLP receiver, the `postgresexporter` with the Postgres DSN, and the logs pipeline wiring them together.
+9. The operator creates a ConfigMap containing the Collector configuration (YAML). The configuration is generated based on `OLSConfig`:
+   - When `spec.templog: true` (or absent): logs pipeline includes the `postgresexporter`
+   - When `spec.templog: false`: logs pipeline has no active exporter
+   - When `spec.audit.otel.endpoint` is set: traces pipeline includes `otlpexporter` pointing at that endpoint
+   - When `spec.audit.otel.endpoint` is absent: no traces pipeline
 10. The Postgres DSN in the Collector configuration uses the same credentials secret the operator already manages for PostgreSQL.
 11. The operator creates a NetworkPolicy allowing ingress to the Collector on port 4317 from agentic-operator and sandbox pods only.
 12. TLS between the Collector and PostgreSQL uses the existing service-ca certificates.
-
-### Collector Teardown
-
-13. When `spec.templog` is `false`, the operator removes the Collector Deployment, Service, ConfigMap, and NetworkPolicy if they exist.
-14. The `templogs` schema and its data are not deleted on teardown.
+13. The operator regenerates and remounts the Collector ConfigMap when `OLSConfig` changes. Changes trigger a Collector restart via resource version annotation tracking.
 
 ### Agentic Pod Wiring
 
-15. When `spec.templog` is `true` (or absent), the operator sets an environment variable on agentic-operator and sandbox pods with the Collector's OTLP log endpoint: `<collector-service>.<namespace>.svc:4317`.
-16. When `spec.templog` is `false`, the operator removes the OTLP log endpoint environment variable from agentic-operator and sandbox pods.
-17. The OTLP log endpoint environment variable is independent of `spec.audit.otel.endpoint` (which is for tracing). Both can be set simultaneously.
+14. The operator always sets an environment variable on agentic-operator and sandbox pods with the Collector's OTLP endpoint: `<collector-service>.<namespace>.svc:4317`. This is always set because the Collector is always deployed.
+15. The operator sets an environment variable on agentic-operator and sandbox pods indicating whether audit is enabled (from `OLSConfig.spec.audit.enabled`).
+16. The operator sets an environment variable on agentic-operator pods indicating whether templog is enabled (from `OLSConfig.spec.templog`), so the agentic-operator knows whether to add the templog-cleanup finalizer to new AgenticRuns.
 
 ## Configuration Surface
 
 | Field path | Description |
 |---|---|
-| `spec.templog` | Boolean. Deploy the OTel Collector for temporary audit log storage in PostgreSQL. Default: `true`. |
+| `spec.templog` | Boolean. Controls whether the Collector writes logs to PostgreSQL. Default: `true`. |
+| `spec.audit.enabled` | Boolean. Controls whether audit events are emitted by components. Default: `true`. |
+| `spec.audit.otel.endpoint` | String. External tracing endpoint. Collector forwards traces here when set. |
 
 ## Constraints
 
-1. The Collector is always a single replica.
+1. The Collector is always deployed as a single replica. It cannot be disabled.
 2. The Collector image reference is managed by the operator (not user-configurable).
-3. The `templogs` schema is never dropped by the operator, even when `spec.templog` is set to `false`.
+3. The `templogs` schema is always created and never dropped by the operator.
 
 ## Cross-References
 
 - Parent spec: `what/templog.md`
 - `what/postgres.md` — PostgreSQL deployment, bootstrap script
-- `what/crd-api.md` — `AgenticOLSConfig` CRD fields
+- `what/crd-api.md` — `OLSConfig` CRD fields
